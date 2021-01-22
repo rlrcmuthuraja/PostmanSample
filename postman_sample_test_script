@@ -1,0 +1,65 @@
+POSTMAN TESTS : 
+
+1.Set environment variable 
+
+var jsonData = JSON.parse(responseBody);
+postman.setEnvironmentVariable("idToken", jsonData.id_token);
+postman.setEnvironmentVariable("accessToken", jsonData.access_token);
+ 
+pm.test("Status code is 200", function () 
+{ pm.response.to.have.status(200); });
+ 
+ 
+2. Get control fee number 
+
+pm.test("Successful POST request", function () {
+    pm.expect(pm.response.code).to.be.oneOf([200]);
+});
+ 
+pm.test("Check proper response", function () {
+    var jsonData = pm.response.json();
+    pm.environment.set("NewFeeNumber", jsonData[0].GebyrId);
+    pm.environment.set("NewKID", jsonData[0].KID);
+});
+ 
+3. Create control fee 
+var jsonObject = xml2Json(responseBody);
+let feeId = jsonObject["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["rpc:InsertOrUpdateFeeResponse"]["SiebelMessage"]["ListOfRFeeExternal"]["PubOffense"].FeeId
+pm.environment.set("FeeId", feeId);
+ 
+let feeNumber = jsonObject["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["rpc:InsertOrUpdateFeeResponse"]["SiebelMessage"]["ListOfRFeeExternal"]["PubOffense"].OffenseNumber
+pm.environment.set("fee-number", feeNumber);
+ 
+console.log('FeeId', feeId);
+console.log('FeeNumber', feeNumber);
+setTimeout(function(){}, 60000);
+
+4. Change due date
+pm.test("Status code is 200", function () 
+{ pm.response.to.have.status(200); });
+ 
+ 
+pm.test("Body contains TraceId", function () 
+{ pm.expect(pm.response.text()).to.include("traceId"); });
+ 
+ 
+5. Get control fee , cancel fee
+
+var jsonData = xml2Json(responseBody);
+console.log("JSON response", jsonData);
+ 
+//Get RBalanceAmount value
+var RBalanceAmount = jsonData["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["rpc:QueryFeeByExampleResponse"]["OutputIntObjectName"]["ListOfRFeeExternalNoAttachment"]["PubOffense"]["RBalanceAmount"];
+var RCloseReason = jsonData["SOAP-ENV:Envelope"]["SOAP-ENV:Body"]["rpc:QueryFeeByExampleResponse"]["OutputIntObjectName"]["ListOfRFeeExternalNoAttachment"]["PubOffense"]["RCloseReason"];
+ 
+console.log("Balance Amount is", RBalanceAmount);
+console.log("Close Reason is", RCloseReason);
+ 
+pm.test("Balance amount = -150", function() {
+    pm.expect(RBalanceAmount).to.eql('-150');
+});
+ 
+pm.test("Close reason = 4 kreditert", function() {
+    pm.expect(RCloseReason).to.eql('4 - Kreditert');
+});
+
